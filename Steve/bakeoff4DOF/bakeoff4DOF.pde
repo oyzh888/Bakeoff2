@@ -63,6 +63,7 @@ void draw() {
   background(40); //background is dark grey
   fill(200);
   noStroke();
+  textSize(20);
 
   //shouldn't really modify this printout code unless there is a really good reason to
   if (userDone)
@@ -104,7 +105,47 @@ void draw() {
   //===========DRAW EXAMPLE CONTROLS=================
   fill(255);
   scaffoldControlLogic(); //you are going to want to replace this!
+  monitorInfo();
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchToPix(.8f));
+}
+
+void ifSetGreen(boolean flag)
+{
+  if(flag) fill(0,255,0);
+  else fill(255);
+}
+void monitorInfo()
+{
+  float l_x = width-inchToPix(2.0f), l_y = inchToPix(0.7f);
+  int lineDis = 20;
+  textSize(15);
+  Target t = targets.get(trialIndex);  
+  String str1 = "x:Target/Yours = " + String.format("%.2f",t.x) + "/" + String.format("%.2f",screenTransX); 
+  String str2 = "y:Target/Yours = " + String.format("%.2f",t.y) + "/" + String.format("%.2f",screenTransY); 
+  String str3 = "rotate:Target/Yours = " + String.format("%.2f",t.rotation) + "/" + String.format("%.2f",screenRotation); 
+  String str4 = "z:Target/Yours = " + String.format("%.2f",t.z) + "/" + String.format("%.2f",screenZ); 
+  
+  // Set green color if matches
+  boolean closeDist = dist(t.x, t.y, screenTransX, screenTransY)<inchToPix(.05f); //has to be within +-0.05"
+  boolean closeDist_x = dist(t.x, 0, screenTransX, 0)<inchToPix(.05f)/1.414; //has to be within +-0.05"
+  boolean closeDist_y = dist(0, t.y, 0, screenTransY)<inchToPix(.05f)/1.414; //has to be within +-0.05"
+  boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation, screenRotation)<=5;
+  boolean closeZ = abs(t.z - screenZ)<inchToPix(.05f); //has to be within +-0.05" 
+
+  //println("%f, %f", l_x, l_y);
+  
+  text("Monitor", l_x, l_y );
+  ifSetGreen(closeDist_x);
+  text(str1, l_x, l_y + lineDis );
+  ifSetGreen(closeDist_y);
+  text(str2, l_x, l_y + 2*lineDis );
+  ifSetGreen(closeRotation);
+  text(str3, l_x, l_y + 3*lineDis );
+  ifSetGreen(closeZ);
+  text(str4, l_x, l_y + 4*lineDis );
+  //text("CW", width-inchToPix(.4f), inchToPix(.4f));
+  fill(255, 255, 255, 30);
+  //rect(l_x, l_y, 150, 100); // x, y, w, h
 }
 
 //my example design for control, which is terrible
@@ -181,10 +222,10 @@ void mouseReleased()
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
 {
-  Target t = targets.get(trialIndex);	
+  Target t = targets.get(trialIndex);  
   boolean closeDist = dist(t.x, t.y, screenTransX, screenTransY)<inchToPix(.05f); //has to be within +-0.05"
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation, screenRotation)<=5;
-  boolean closeZ = abs(t.z - screenZ)<inchToPix(.05f); //has to be within +-0.05"	
+  boolean closeZ = abs(t.z - screenZ)<inchToPix(.05f); //has to be within +-0.05"  
 
   println("Close Enough Distance: " + closeDist + " (cursor X/Y = " + t.x + "/" + t.y + ", target X/Y = " + screenTransX + "/" + screenTransY +")");
   println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(t.rotation, screenRotation)+")");
